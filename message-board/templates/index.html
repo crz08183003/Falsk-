@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<body background={{url_for('static', filename='image/a4640b304cc9875c8801a6acf0a82cc4.png')}}
+    style="background-repeat:no-repeat;
+    background-size:cover;">
+
+    <div class="list-group" style="background-color: rgba(255,255,255,0.5)">
+        {% for message in messages %}
+
+            <div  style="padding:3px 15px"><a class="list-group-item list-group-item-action flex-column">
+                <div class="d-flex w-100 justify-content-between" >
+                    <h5 class="mb-1 text-success">{{ message.name}}
+                        <small class="text-muted"> 第{{ loop.index }}篇留言</small>
+                    </h5>
+                    <small data-toggle="tooltip" data-placement="top"
+                           data-delay="500">
+                    </small>
+                </div>
+                <p class="mb-1">{{ message.body }}</p>
+                <p class="mb-1">用户名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ message.username }}</p>
+                <p class="mb-1">留言时间： &nbsp;&nbsp;{{ message.time }}</p>
+            </a></div>
+        {% endfor %}
+    </div>
+</body>
+{% endblock %}

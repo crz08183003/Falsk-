@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    *{
+        margin: 0;padding: 0;
+    }
+    html{
+        height: 100%;
+    }
+    body{
+        width: 100%;
+        height: 100%;
+    }
+    .page1{
+        margin: 0;padding: 0;overflow: hidden;
+        background-color: black;
+        background: url(夜晚.jpg) no-repeat;
+        background-size:2120px;
+        height: 100%;
+        width: 100%;
+        position: relative;
+
+    }
+    .page{
+        width: 100%;height: 100%;
+        background-color: black;
+        position: relative;
+    }
+    .page3{
+        background-color:#fff;
+    }
+    .btn{
+        display:block;
+        position:absolute;z-index: 3;
+        width:60px;height: 60px;
+        border: 1px solid rgb(43, 165, 231);outline:none;
+        border-radius: 50%;
+        box-shadow: 0px 0px 20px #fff ;
+        background-color: rgb(43, 165, 231);
+        bottom: 50px;left: 50%;padding-bottom: 6px;
+        transform: translate(-50%,-50%);
+        cursor: pointer;transform: rotateZ(90deg);
+        
+    }
+    .btn::after{
+        content:'△';
+        color:#fff;
+        height: 60px;
+        transform:rotateY(90deg);
+        font-size: 40px;line-height: 50px;
+        padding-left: 4px;
+    }
+    .btn:active{
+        box-shadow: 0px 0px 10px #fff ;
+    }
+</style>
+<body>
+    <div class="page1">
+        <canvas id="meteor_canvas"></canvas>
+    </div>
+        
+
+</body>
+<script>
+ 
+//***********************流星雨**********************
+function lx(obj){//传入一个流星对象    
+    //这个function为构造函数模式（每个方法都要在实例上重新创建一遍 所以方法写在原型里）
+    //设置这些属性是为了流星消失后 回收内存
+    this.Id = 'meteor_canvas';
+    //this.src = obj.src;//图片地址   回收内存
+    this.img = '';//图片
+    this.cxt = '';// canvas实例   
+    this.Time = '';//此时间为 定时器控制流星运动
+    this.Time2 = ''; //此时间为 流星出现频率
+    this.sum = 400;//流星出现频率
+    this.beginIpY = [];//流星初始位置 Y轴
+    this.beginIpX = [];//流星初始位置 X轴
+    this.sd = [];//每个流星的速度
+    this.init();//初始化   这个方法会在下面的原型中设置
+}
+lx.prototype = {//这个prototype属性指向一个对象 这个对象的用途是包含可以由特定类型的所有实例共享的属性和方法
+    init: function(){
+        //获取canvas及其画布对象    远爷说不要用var  let定义的是块级作用于的变量
+        var canvas = document.getElementById(this.Id);//这里的id是传入canvas对象的属性
+        //canvas 是临时变量  init（）结束后会销毁
+        canvas.setAttribute('width',window.innerWidth*1.1);//设置2d画布的宽度和高度
+        canvas.setAttribute('height',window.innerHeight*1.1);
+        var context = canvas.getContext('2d');//canvas的2d画布上下文，必须现在画布上创建一个2d上下文
+        this.ctx = context;//返回第58行，在这里传入context2d画布
+        this.insta();
+    },//对象当中每个属性和方法后面不要忘记加 逗号 ，
+    insta: function(){
+        var that = this;//此时将this指向赋给名为that的变量
+        that.positionStar();//canvas背景
+    },
+    //创建星星
+    newStar: function(){
+        this.ctx.clearRect(0,0,window.innerWidth*2,window.innerHeight*2)//clearRect 清除一个区域的矩形，此行会在每次传入一个星星清空画布
+        this.ctx.strokeStyle = '#fff';//设置画笔的样式’颜色‘   以字符串的形式接受
+        this.ctx.lineCap = 'round'//绘制圆形的结束线帽   "round" 和 "square" 会使线条略微变长。
+        this.ctx.lineWidth = 4;// 宽度
+        for(var i = 0;i < this.beginIpY.length;i ++){
+            //lim 流星极限位置
+            var lim = Math.floor(Math.random()*10*window.innerHeight) + 500;
+            var ctx = this.ctx;//对象的画布
+            if( this.beginIpY[i] >= lim){
+                this.beginIpY.splice(i,1);//这个方法删除index处的n个元素
+                this.beginIpX.splice(i,1);//初始化位置
+                this.sd.splice(i,1);
+            }else{
+                //如果没有超出界限  那么我以一个速度移动他的位置
+                this.beginIpX[i] = this.beginIpX[i] + this.sd[i];//x轴位置加上水平速度
+                this.beginIpY[i] = this.beginIpY[i] + this.sd[i];//y轴位置加上竖直速度
+
+                //渐变效果...
+                var gra = ctx.createRadialGradient(
+                    this.beginIpX[i], this.beginIpY[i], 0, this.beginIpX[i], this.beginIpY[i], 50)
+                var PI = Math.PI
+                var tail = Math.random()*20 + 30;//设置流星尾巴的长度  如果是随机值  每次移动都会改变  这样就会产生尾巴忽长忽短的效果
+                ctx.beginPath();//绘制路径开始
+                //流星头，二分之一圆
+                ctx.arc(this.beginIpX[i], this.beginIpY[i], 2, -PI / 4, -5 * PI / 4);//arc  是画圆的方法
+                //绘制流星尾，三角形
+                ctx.lineTo(this.beginIpX[i] - tail, this.beginIpY[i] - tail);//流星的尾巴 拖动 根号下（50平方 +50平方） 方向与速度相同
+                ctx.closePath();    
+                ctx.stroke();//下笔
+            }
+        }
+    },
+    //流星定位
+    positionStar: function(){
+        for(var i=0;i<1;i++){
+            var lim = Math.floor(Math.random()*2000);
+            var wt = Math.floor(Math.random() * 0);
+            var sd = Math.floor(Math.random() * 4) + 2;
+            //开始位置
+            this.beginIpX.push(lim);this.beginIpY.push(wt);
+            this.sd.push(sd);
+        }
+        this.starAnimet();
+    },
+    //星星如何运动
+    starAnimet:function(){
+        var  that = this;//在这里定义临时外部变量  里面可以访问到外面的变量
+        this.Time = setInterval(function(){//封装函数
+             that.newStar();//执行创建星星的函数    这里的that如果写this，这里的this指向的是function的作用域
+        },1);//每一千分之一秒执行一次本函数  就是每1毫秒星星运动de规律
+        this.pushStarfun();//添加星星de函数
+    },
+    //  想要很多个星星怎么办
+    pushStarfun: function(){
+        var  that = this;
+        console.log('pushstarfun');
+        this.Time2 = setInterval(function(){//反模式中要求给 定时函数 中传入函数 而不是 字符串
+            if(that.beginIpY.length < 5){
+                var lim = Math.floor(Math.random()*2000);
+                var wt = Math.floor(Math.random() * 30);
+                var sd = Math.floor(Math.random() * 4) + 2;
+                //开始位置
+                that.beginIpX.push(lim);
+                that.beginIpY.push(wt);
+                that.sd.push(sd);
+            }
+        },this.sum)//构造函数中sum是频率
+    }
+}
+var meteor = new lx();
+
+</script>
+<script>
+    document.querySelector('.page1').addEventListener('click',function({
+        window.location.href = 'index.html';
+                                                                       }))
+</script>
+</html>

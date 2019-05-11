@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% block head %}
+        {% block metas %}
+            <meta charset="utf-8">
+        {% endblock metas %}
+
+        <title>{% block title %}Message Board{% endblock %}</title>
+        {% block styles %}
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css' ) }}">
+        {% endblock styles %}
+    {% endblock head %}
+</head>
+<body>
+<nav>
+    {% block nav %}
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="{{ url_for('index') }}">主页</a></li>
+            <li><a href="{{url_for('login')}}">登录</a></li>
+            <li><a href="{{ url_for('reg')}}">注册</a></li>
+            <li><a href="{{url_for('message')}}">留言</a></li>
+        </ul>
+    {% endblock %}
+
+
+</nav>
+
+
+<main>
+    {% for message in get_flashed_messages() %}
+        <div class="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

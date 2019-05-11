@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Title</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        overflow: hidden;
+    }
+</style>
+<body>
+<canvas id="paint"></canvas>
+<script>
+    //获取画布对象
+    var paint = document.getElementById('paint');
+    //获取2d画布
+    var ctx = paint.getContext('2d');
+    //布置画布
+    var W = window.innerWidth;
+    var H = window.innerHeight;
+    paint.height= H;
+    paint.width= W;
+
+    //文字大小
+    var fontSize = 16;
+    //每列文字的y轴坐标
+    var colums = Math.floor(W / fontSize);
+    //记录文字y轴坐标
+    var drops = [];
+    //给每一个文字初始化一个起始点的位置
+    for (var i = 0; i < colums; i++) {
+        drops[i] = Infinity;
+    }
+    var str = 'javascript function(){}';
+
+    function draw() {
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.fillStyle = '#00cc33';
+        for (var i = 0; i < colums; i++) {
+            var index = Math.floor(Math.random() * str.length);
+            var x = i * fontSize;
+            var y = drops[i] * fontSize;
+            ctx.fillText(str[index], x, y);
+            if (y >= paint.height && Math.random() > 0.99) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+
+    }
+
+    setInterval(draw, 30);
+</script>
+</body>
+</html>
